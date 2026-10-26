@@ -1,0 +1,16 @@
+node_modules
+dist
+data
+.git
+.gitignore
+.pytest_cache
+__pycache__
+*.pyc
+test-results
+playwright-report
+.env
+*.log
+README.md
+info.md
+tests
+playwright.config.ts

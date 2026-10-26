@@ -1,0 +1,15 @@
+services:
+  wind-forecast:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DECISION_CUTOFF_LOCAL_TIME: ${DECISION_CUTOFF_LOCAL_TIME:-17:00}
+      DECISION_TIMEZONE: ${DECISION_TIMEZONE:-Europe/London}
+      ELEXON_TIMEOUT_SECONDS: ${ELEXON_TIMEOUT_SECONDS:-35}
+    volumes:
+      - wind-cache:/app/data
+    restart: unless-stopped
+
+volumes:
+  wind-cache:
