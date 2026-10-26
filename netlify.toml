@@ -1,0 +1,18 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# FastAPI backend on the GCE VM (instance-20261026-113427); Netlify proxies server-side.
+[[redirects]]
+  from = "/api/*"
+  to = "http://136.115.17.230/api/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

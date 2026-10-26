@@ -37,3 +37,6 @@ playwright-report/
 
 .venv/
 data/
+
+# Local Netlify folder
+.netlify
