@@ -13,6 +13,7 @@ import { downloadCsv, formatDate, formatDateTime, formatMW, formatNumber, format
 import type { DecisionDay, Period } from '@/types/wind'
 
 const DEFAULT_DECISION = '2026-01-30'
+const PAGE_SIZE = 12
 
 interface ChartPoint {
   x: number
@@ -62,6 +63,12 @@ export default function DecisionDayPage() {
   const loading = !current
   const [statusOpen, setStatusOpen] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
+  const [page, setPage] = useState(0)
+  const [pageDate, setPageDate] = useState(decisionDate)
+  if (pageDate !== decisionDate) {
+    setPageDate(decisionDate)
+    setPage(0)
+  }
 
   useEffect(() => {
     let active = true
@@ -75,6 +82,10 @@ export default function DecisionDayPage() {
 
   const selectedPeriod = useMemo(() => data?.periods.find((period) => period.startTime === selectedStart) ?? null, [data, selectedStart])
   const chartPoints = useMemo(() => toChartPoints(data?.periods ?? []), [data])
+  const periods = data?.periods ?? []
+  const pageCount = Math.ceil(periods.length / PAGE_SIZE)
+  const currentPage = Math.min(page, Math.max(pageCount - 1, 0))
+  const pagePeriods = periods.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE)
   const chartDomain: [number, number] = chartPoints.length ? [chartPoints[0].x, chartPoints[chartPoints.length - 1].x] : [0, 1]
   const chartTicks = chartPoints.filter((point) => point.x % (3 * 3_600_000) === 0).map((point) => point.x)
   const crosshair = useCrosshair()
@@ -153,7 +164,7 @@ export default function DecisionDayPage() {
             </div>
             <div className="table-heading"><div><h3>Half-hour detail</h3><p>The hourly forecast repeats across its two actual-generation periods.</p></div><span>{data.periods.length} periods</span></div>
             <div className="data-table-wrap"><table className="data-table"><thead><tr><th>Delivery period</th><th>Selected forecast</th><th>Published</th><th>Actual</th><th>Error</th><th><span className="sr-only">Details</span></th></tr></thead><tbody>
-              {data.periods.map((period) => <tr key={period.startTime}>
+              {pagePeriods.map((period) => <tr key={period.startTime}>
                 <td><strong>{formatTime(period.startTime)}–{formatTime(period.endTime)}</strong><small>{formatDate(period.startTime, { day: '2-digit', month: 'short', timeZone: 'UTC' })}</small></td>
                 <td>{period.forecast == null ? <span className="missing">No eligible forecast</span> : formatMW(period.forecast)}</td>
                 <td>{period.publishTime ? formatDateTime(period.publishTime) : 'N/A'}</td>
@@ -162,6 +173,16 @@ export default function DecisionDayPage() {
                 <td><button className="table-action" onClick={() => openPeriod(period)}>Open</button></td>
               </tr>)}
             </tbody></table></div>
+            {pageCount > 1 && <div className="table-pagination">
+              <span>Rows {currentPage * PAGE_SIZE + 1}–{Math.min((currentPage + 1) * PAGE_SIZE, periods.length)} of {periods.length}</span>
+              <div className="pagination-controls">
+                <button className="pagination-button" onClick={() => setPage(currentPage - 1)} disabled={currentPage === 0} aria-label="Previous page">Prev</button>
+                {Array.from({ length: pageCount }, (_, i) => (
+                  <button key={i} className={`pagination-button${i === currentPage ? ' current' : ''}`} onClick={() => setPage(i)} aria-label={`Page ${i + 1}`} aria-current={i === currentPage ? 'page' : undefined}>{i + 1}</button>
+                ))}
+                <button className="pagination-button" onClick={() => setPage(currentPage + 1)} disabled={currentPage >= pageCount - 1} aria-label="Next page">Next</button>
+              </div>
+            </div>}
           </>}
         </section>
 

@@ -39,10 +39,17 @@ async function mockApi(page: Page) {
 
 test.beforeEach(async ({ page }) => { await mockApi(page) })
 
-test('Decision Day shows 48 periods and only the cutoff forecast is selected', async ({ page }, testInfo) => {
+test('Decision Day paginates the 48 periods and only the cutoff forecast is selected', async ({ page }, testInfo) => {
   await page.goto('/decision-day?decisionDate=2026-01-10')
   await expect(page.getByRole('heading', { name: 'National wind generation' })).toBeVisible()
-  await expect(page.locator('.data-table tbody tr')).toHaveCount(48)
+  await expect(page.locator('.data-table tbody tr')).toHaveCount(12)
+  await expect(page.locator('.table-pagination')).toContainText('Rows 1–12 of 48')
+  await expect(page.locator('.data-table tbody tr').first()).toContainText('00:00')
+  await page.getByRole('button', { name: 'Next page' }).click()
+  await expect(page.locator('.table-pagination')).toContainText('Rows 13–24 of 48')
+  await expect(page.locator('.data-table tbody tr').first()).toContainText('06:00')
+  await page.getByRole('button', { name: 'Page 1' }).click()
+  await expect(page.locator('.data-table tbody tr').first()).toContainText('00:00')
   await page.screenshot({ path: testInfo.outputPath('decision-desktop.png'), fullPage: false })
   await page.getByRole('button', { name: 'Open', exact: true }).first().click()
   await expect(page.getByRole('dialog')).toBeVisible()
@@ -97,7 +104,7 @@ test('Source failures explain that no zero substitution occurred', async ({ page
 test('Mobile layout keeps the page within the viewport', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/decision-day?decisionDate=2026-01-10')
-  await expect(page.locator('.data-table tbody tr')).toHaveCount(48)
+  await expect(page.locator('.data-table tbody tr')).toHaveCount(12)
   const widths = await page.evaluate(() => ({ body: document.body.scrollWidth, viewport: window.innerWidth }))
   expect(widths.body).toBeLessThanOrEqual(widths.viewport)
   await page.screenshot({ path: testInfo.outputPath('decision-mobile.png'), fullPage: false })

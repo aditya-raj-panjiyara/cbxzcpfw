@@ -140,6 +140,12 @@
 .data-table th:nth-child(n+2):nth-child(-n+5), .revision-table th:nth-child(n+2):nth-child(-n+3) { text-align: right; }
 .table-action { min-width: 48px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; border: 0; background: transparent; color: var(--forecast); font-family: 'Rubik', sans-serif; font-size: 11px; font-weight: 500; }
 .table-action:hover { text-decoration: underline; }
+.table-pagination { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 10px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; font-size: 10px; }
+.pagination-controls { display: flex; gap: 4px; }
+.pagination-button { min-width: 32px; min-height: 32px; padding: 0 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-family: 'IBM Plex Mono', monospace; font-size: 10px; }
+.pagination-button:hover:not(:disabled):not(.current) { border-color: var(--muted); background: var(--surface-subtle); }
+.pagination-button.current { background: var(--ink-strong); color: var(--surface); border-color: var(--ink-strong); }
+.pagination-button:disabled { opacity: .4; cursor: default; }
 .missing { color: var(--muted); font-family: 'Rubik', sans-serif; font-size: 10px; }
 .error-positive { color: #765500 !important; }
 .error-negative { color: #3f6174 !important; }
