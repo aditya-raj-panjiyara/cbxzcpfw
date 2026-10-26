@@ -115,7 +115,6 @@ export default function DecisionDayPage() {
           </dl>}
           <div className="rail-rule" />
           <Link className="button secondary full-width" to={`/accuracy?decisionFrom=${decisionDate}&decisionTo=${decisionDate}`}>View historical accuracy<ArrowRight size={16} aria-hidden="true" /></Link>
-          <p className="rail-note"><Info size={15} aria-hidden="true" />Selected forecast = latest version published at or before the cutoff.</p>
         </aside>
 
         <section className="main-stage" aria-live="polite">

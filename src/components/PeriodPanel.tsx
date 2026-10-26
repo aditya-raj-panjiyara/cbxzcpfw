@@ -49,7 +49,7 @@ export function PeriodPanel({ period, decision, onClose }: PeriodPanelProps) {
             <div><dt>Error</dt><dd>{period.error == null ? 'Not calculable' : `${formatSigned(period.error)} · ${period.error > 0 ? 'Overforecast' : period.error < 0 ? 'Underforecast' : 'Exact'}`}</dd></div>
             <div><dt>Lead time</dt><dd>{period.leadTimeHours == null ? 'N/A' : `${period.leadTimeHours} hours`}</dd></div>
           </dl>
-          <p className="panel-note">The forecast is hourly and applies to both half-hour actual periods. Error = forecast − actual.</p>
+          <p className="panel-note">Error = forecast − actual.</p>
           <section className="panel-section revisions-section">
             <h3>Forecast history</h3>
             {error && <p className="inline-error">{error}</p>}
