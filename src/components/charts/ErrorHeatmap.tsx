@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router'
-import { formatDate, formatMW, formatSigned } from '@/lib/format'
+import { Link } from 'react-router'
+import { ArrowRight } from 'lucide-react'
+import { formatDate, formatMW, formatSigned, formatTime } from '@/lib/format'
 import type { AccuracyPair } from '@/types/wind'
 
 interface ErrorHeatmapProps {
@@ -33,8 +34,13 @@ function cellColor(error: number, scale: number) {
 }
 
 export function ErrorHeatmap({ pairs, decisionFrom, decisionTo, deliveryFrom, deliveryTo, fromTime, toTime }: ErrorHeatmapProps) {
-  const navigate = useNavigate()
   const [hovered, setHovered] = useState<AccuracyPair | null>(null)
+  const [selected, setSelected] = useState<AccuracyPair | null>(null)
+  const [selectedFor, setSelectedFor] = useState(pairs)
+  if (selectedFor !== pairs) {
+    setSelectedFor(pairs)
+    setSelected(null)
+  }
 
   const { days, hours, cells, scale } = useMemo(() => {
     // Rows are every delivery day in the requested range, so excluded hours stay visible as gaps.
@@ -53,8 +59,6 @@ export function ErrorHeatmap({ pairs, decisionFrom, decisionTo, deliveryFrom, de
     return { days, hours, cells, scale }
   }, [pairs, decisionFrom, decisionTo, deliveryFrom, deliveryTo, fromTime, toTime])
 
-  const inspect = (pair: AccuracyPair) => navigate(`/decision-day?decisionDate=${pair.decisionDate}&deliveryStart=${encodeURIComponent(pair.startTime)}`)
-
   return (
     <div className="chart-frame heatmap-frame" aria-label="Signed forecast error by delivery day and hour">
       <div className="chart-legend">
@@ -70,17 +74,25 @@ export function ErrorHeatmap({ pairs, decisionFrom, decisionTo, deliveryFrom, de
           {hours.map((hour) => {
             const pair = cells.get(`${day}|${hour}`)
             if (!pair) return <span key={hour} className="heatmap-cell missing" title={`${formatDate(day)} · ${String(hour).padStart(2, '0')}:00 · no matched pair`} />
-            return <button key={hour} type="button" tabIndex={-1} className="heatmap-cell" style={{ background: cellColor(pair.error, scale) }}
-              aria-label={`${formatDate(day)} ${String(hour).padStart(2, '0')}:00, error ${formatSigned(pair.error)}`}
-              onMouseEnter={() => setHovered(pair)} onFocus={() => setHovered(pair)} onClick={() => inspect(pair)} />
+            return <button key={hour} type="button" tabIndex={-1} className={`heatmap-cell${selected === pair ? ' selected' : ''}`} style={{ background: cellColor(pair.error, scale) }}
+              aria-label={`${formatDate(day)} ${String(hour).padStart(2, '0')}:00, error ${formatSigned(pair.error)}`} aria-pressed={selected === pair}
+              onMouseEnter={() => setHovered(pair)} onFocus={() => setHovered(pair)} onClick={() => setSelected(selected === pair ? null : pair)} />
           })}
         </div>)}
       </div>
       <p className="heatmap-readout" aria-live="polite">
         {hovered
           ? <><strong>{formatDate(hovered.startTime)} · {new Date(hovered.startTime).toISOString().slice(11, 16)}</strong><span>Forecast {formatMW(hovered.forecast)}</span><span>Actual mean {formatMW(hovered.actual)}</span><span className={hovered.error >= 0 ? 'error-positive' : 'error-negative'}>{hovered.error >= 0 ? 'Over' : 'Under'} {formatSigned(hovered.error)}</span></>
-          : <span>Hover a cell to read it; click to open that decision. Colour is capped at the 95th percentile of |error|.</span>}
+          : <span>Hover a cell to read it; click to pin it without leaving this page. Colour is capped at the 95th percentile of |error|.</span>}
       </p>
+      {selected && <div className="heatmap-detail">
+        <div className="heatmap-fact"><span>Delivery hour</span><b>{formatDate(selected.startTime)} · {formatTime(selected.startTime)}</b></div>
+        <div className="heatmap-fact"><span>Decision date</span><b>{formatDate(selected.decisionDate)}</b></div>
+        <div className="heatmap-fact"><span>Forecast</span><b>{formatMW(selected.forecast)}</b></div>
+        <div className="heatmap-fact"><span>Actual mean</span><b>{formatMW(selected.actual)}</b></div>
+        <div className="heatmap-fact"><span>Error</span><b className={selected.error >= 0 ? 'error-positive' : 'error-negative'}>{formatSigned(selected.error)}</b></div>
+        <Link className="text-link" to={`/decision-day?decisionDate=${selected.decisionDate}&deliveryStart=${encodeURIComponent(selected.startTime)}`}>Open this decision<ArrowRight size={14} /></Link>
+      </div>}
     </div>
   )
 }

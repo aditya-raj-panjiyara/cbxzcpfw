@@ -113,6 +113,12 @@
 .heatmap-cell { display: block; height: 14px; min-width: 0; padding: 0; border: 0; border-radius: 1px; cursor: pointer; }
 .heatmap-cell:hover { outline: 2px solid var(--ink-strong); outline-offset: -1px; position: relative; }
 .heatmap-cell.missing { cursor: default; background: repeating-linear-gradient(135deg, var(--surface) 0 2px, var(--line-strong) 2px 3px); }
+.heatmap-cell.selected { outline: 2px solid var(--accent); outline-offset: 0; position: relative; }
+.heatmap-detail { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 24px; margin-top: 12px; padding: 11px 13px; border: 1px solid var(--line-strong); border-left: 3px solid var(--accent); background: var(--surface); }
+.heatmap-fact { display: flex; flex-direction: column; gap: 2px; }
+.heatmap-fact span { color: var(--muted); font-size: 10px; }
+.heatmap-fact b { color: var(--ink); font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; }
+.heatmap-detail .text-link { margin-left: auto; min-height: 36px; }
 .heatmap-readout { display: flex; flex-wrap: wrap; gap: 4px 16px; min-height: 20px; margin: 10px 0 0; color: var(--muted); font-size: 11px; font-family: 'IBM Plex Mono', monospace; }
 .heatmap-readout strong { color: var(--ink-strong); font-weight: 500; }
 .revision-chart { margin-bottom: 12px; padding: 10px 4px 2px; border: 1px solid var(--line); background: var(--surface); }
