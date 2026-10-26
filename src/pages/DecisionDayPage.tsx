@@ -102,7 +102,6 @@ export default function DecisionDayPage() {
     <AppShell onStatus={() => setStatusOpen(true)}>
       <main className="workspace-grid">
         <aside className="control-rail">
-          <div className="rail-heading"><span className="section-label">DECISION INPUT</span><h1>Decision Day</h1><p>Reconstruct the national wind forecast available at the purchasing cutoff.</p></div>
           <label className="field-label" htmlFor="decision-date">Purchase decision date</label>
           <input id="decision-date" className="date-input" type="date" min="2026-01-01" max="2026-01-31" value={decisionDate} onChange={(event) => {
             const next = new URLSearchParams(searchParams); next.set('decisionDate', event.target.value); next.delete('deliveryStart'); setSearchParams(next)
