@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowRight, Download, Info } from 'lucide-react'
+import { ArrowRight, Download } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router'
 import { Area, CartesianGrid, ComposedChart, Customized, Line, ReferenceArea, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { AppShell } from '@/components/AppShell'
