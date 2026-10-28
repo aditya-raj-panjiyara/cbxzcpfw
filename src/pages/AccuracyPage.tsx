@@ -130,7 +130,12 @@ export default function AccuracyPage() {
               <ForecastTimeline key={queryKey} pairs={data.pairs} />
               <div className="table-heading"><div><h3>Error by day and hour</h3><p>Each cell is one delivery hour. Hatched cells had no matched pair and are excluded, not zero.</p></div></div>
               <ErrorHeatmap pairs={data.pairs} decisionFrom={data.decisionFrom} decisionTo={data.decisionTo} deliveryFrom={searchParams.get('deliveryFrom')} deliveryTo={searchParams.get('deliveryTo')} fromTime={searchParams.get('fromTime')} toTime={searchParams.get('toTime')} />
-              <div className="table-heading"><div><h3>Error distribution</h3><p>How often each size of miss occurred in this filtered sample.</p></div><span>{formatNumber(data.pairs.length)} hours</span></div>
+              <div className="table-heading">
+                <div>
+                  <h3>Error distribution</h3>
+                  <p>How often each size of miss occurred in this filtered sample.</p>
+                </div>
+                <span>{formatNumber(data.pairs.length)} hours</span></div>
               <ErrorHistogram errors={data.pairs.map((pair) => pair.error)} bias={data.metrics.bias} p05={data.errorRange.p05} p95={data.errorRange.p95} />
               <div className="table-heading"><div><h3>Largest absolute errors</h3><p>Inspect the forecast versions and decision context behind each miss.</p></div><span>Top {largestErrors.length}</span></div>
               <div className="data-table-wrap"><table className="data-table"><thead><tr><th>Delivery hour</th><th>Decision</th><th>Forecast</th><th>Actual mean</th><th>Error</th><th><span className="sr-only">Inspect</span></th></tr></thead><tbody>{largestErrors.map((pair) => <tr key={`${pair.decisionDate}-${pair.startTime}`}><td><strong>{formatDate(pair.startTime)} · {formatTime(pair.startTime)}</strong></td><td>{formatDate(pair.decisionDate)}</td><td>{formatMW(pair.forecast)}</td><td>{formatMW(pair.actual)}</td><td className={pair.error >= 0 ? 'error-positive' : 'error-negative'}>{formatSigned(pair.error)}</td><td><Link className="table-action" to={`/decision-day?decisionDate=${pair.decisionDate}&deliveryStart=${encodeURIComponent(pair.startTime)}`}>Inspect</Link></td></tr>)}</tbody></table></div>
