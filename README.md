@@ -4,6 +4,8 @@ A day-ahead wind forecast reconstruction and accuracy workspace for a UK electri
 
 Stack: React + TypeScript, FastAPI, SQLite cache, pytest/vitest/Playwright, Docker.
 
+Live sample: [Wind Forecast Decisions](https://databrick.hey-adi.me/decision-day)
+
 ## How it works
 
 **Decision Day.** Pick a decision date in January 2026; the delivery day is the following calendar day. For each delivery hour, the backend selects the latest WINDFOR revision with `publishTime <= decisionCutoff` (default 17:00 Europe/London) and compares it with FUELHH actuals in a chart and 48-row table. Later revisions are kept for audit but labelled "After cutoff" and never selected. Displayed rows export to CSV.
@@ -14,23 +16,61 @@ Stack: React + TypeScript, FastAPI, SQLite cache, pytest/vitest/Playwright, Dock
 
 For `error = forecast - actual` (positive means overforecast): MAE = mean(|error|), RMSE = sqrt(mean(error²)), Bias = mean(error). The p05–p95 band shows only with 30+ matched errors; it's historical evidence, not a guarantee.
 
-## Running it
+## Project layout
 
-Docker (with Compose):
-
-```bash
-docker compose up --build   # http://localhost:3000
+```text
+.
+├── backend/
+│   ├── main.py              FastAPI routes, validation, errors, static client
+│   ├── service.py           Elexon ingestion, alignment, analysis, source status
+│   ├── models.py            Cutoff, selection, metric, and time helpers
+│   ├── repository.py        Revision-preserving SQLite cache
+│   ├── requirements.txt     Pinned Python dependencies
+│   └── tests/               Backend unit and service tests
+├── src/
+│   ├── pages/               Decision Day and Accuracy routes
+│   ├── components/          Charts, panels, data states, and UI components
+│   ├── hooks/               Shared browser and chart behaviour
+│   └── lib/                 API client, types, formatting, and frontend tests
+├── tests/                   Playwright browser journeys with mocked API data
+├── Dockerfile               React build followed by Python runtime
+├── docker-compose.yml       Application port, environment, and cache volume
+├── .env.example             Documented configuration defaults
+├── package.json             Frontend scripts and dependencies
+└── vite.config.ts           Development server and API proxy
 ```
 
-Local dev needs Node 22+ and Python 3.12+:
+## Running it
+
+Docker with Compose is the recommended way to start the complete application:
+
+```bash
+docker compose up --build
+```
+
+Open http://localhost:3000. The Compose named volume preserves the SQLite cache between container restarts.
+
+For local development, install Node 22+ and Python 3.12+, then create the virtual environment expected by the npm scripts:
 
 ```bash
 npm install
-python3 -m pip install -r backend/requirements.txt
+python3 -m venv .venv
+.venv/bin/python -m pip install -r backend/requirements.txt
 npm run dev
 ```
 
-Vite proxies `/api` to FastAPI on :8000. Tests: `npm test`, `npm run test:api`, `npm run test:e2e` (browser journeys, mocked API).
+Open http://localhost:3000. Vite serves the React client and proxies `/api` to FastAPI on port 8000.
+
+## Tests
+
+```bash
+npm test                 # Frontend unit tests
+npm run test:api         # Backend pytest suite
+npm run test:e2e         # Playwright browser journeys, mocked API
+npm run build            # Type-check and production frontend build
+```
+
+Playwright needs a Chromium installation. To use an existing Chrome or Chromium binary, set `CHROMIUM_PATH` before running `npm run test:e2e`.
 
 ## API
 
@@ -67,3 +107,7 @@ Key env vars: `DECISION_CUTOFF_LOCAL_TIME` (17:00), `DECISION_TIMEZONE` (Europe/
 
 - The repo ships no fabricated forecast snapshot. If Elexon is unreachable the app says so instead of substituting synthetic data.
 - Out of scope: durable production database, authentication, scheduled preloading, multi-market support, ML forecasting. It's a decision-support tool, not trading advice.
+
+## AI-use disclosure
+
+AI tools assisted with application development, testing, and documentation.
