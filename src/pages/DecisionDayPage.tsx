@@ -14,6 +14,12 @@ import type { DecisionDay, Period } from '@/types/wind'
 
 const DEFAULT_DECISION = '2026-01-30'
 const PAGE_SIZE = 12
+const DAY_MS = 86_400_000
+
+// Delivery is always the day after the purchase decision.
+function addDays(day: string, days: number) {
+  return new Date(Date.parse(`${day}T00:00:00Z`) + days * DAY_MS).toISOString().slice(0, 10)
+}
 
 interface ChartPoint {
   x: number
@@ -113,13 +119,14 @@ export default function DecisionDayPage() {
     <AppShell onStatus={() => setStatusOpen(true)}>
       <main className="workspace-grid">
         <aside className="control-rail">
-          <label className="field-label" htmlFor="decision-date">Purchase decision date</label>
-          <input id="decision-date" className="date-input" type="date" min="2026-01-01" max="2026-01-31" value={decisionDate} onChange={(event) => {
-            const next = new URLSearchParams(searchParams); next.set('decisionDate', event.target.value); next.delete('deliveryStart'); setSearchParams(next)
+          <label className="field-label" htmlFor="delivery-date">Delivery date</label>
+          <input id="delivery-date" className="date-input" type="date" min="2026-01-02" max="2026-02-01" value={addDays(decisionDate, 1)} onChange={(event) => {
+            if (!event.target.value) return
+            const next = new URLSearchParams(searchParams); next.set('decisionDate', addDays(event.target.value, -1)); next.delete('deliveryStart'); setSearchParams(next)
           }} />
-          <p className="field-help">The archive is filtered by decision date, not delivery date.</p>
+          <p className="field-help">The forecast shown is the one available at the cutoff on the day before delivery.</p>
           {data && <dl className="context-list">
-            <div><dt>Delivery day</dt><dd>{formatDate(data.deliveryDate)}</dd></div>
+            <div><dt>Purchase decision date</dt><dd>{formatDate(data.decisionDate)}</dd></div>
             <div><dt>Purchasing cutoff</dt><dd>{data.cutoffLocalTime} GMT</dd></div>
             <div><dt>Forecast resolution</dt><dd>Hourly</dd></div>
             <div><dt>Actual resolution</dt><dd>Half-hourly</dd></div>
