@@ -88,19 +88,19 @@ def accuracy(
         raise HTTPException(503, str(exc)) from exc
 
 
-DIST = Path(os.getenv("FRONTEND_DIST", "dist")).resolve()
-if (DIST / "assets").exists():
-    app.mount("/assets", StaticFiles(directory=DIST / "assets"), name="assets")
+# DIST = Path(os.getenv("FRONTEND_DIST", "dist")).resolve()
+# if (DIST / "assets").exists():
+#     app.mount("/assets", StaticFiles(directory=DIST / "assets"), name="assets")
 
 
-@app.get("/{full_path:path}", include_in_schema=False)
-def serve_client(full_path: str):
-    if full_path.startswith("api/"):
-        raise HTTPException(404, "API route not found")
-    index_file = DIST / "index.html"
-    if not index_file.exists():
-        raise HTTPException(503, "Frontend build not found. Run npm run build first.")
-    requested = (DIST / full_path).resolve()
-    if full_path and requested.is_file() and DIST in requested.parents:
-        return FileResponse(requested)
-    return FileResponse(index_file)
+# @app.get("/{full_path:path}", include_in_schema=False)
+# def serve_client(full_path: str):
+#     if full_path.startswith("api/"):
+#         raise HTTPException(404, "API route not found")
+#     index_file = DIST / "index.html"
+#     if not index_file.exists():
+#         raise HTTPException(503, "Frontend build not found. Run npm run build first.")
+#     requested = (DIST / full_path).resolve()
+#     if full_path and requested.is_file() and DIST in requested.parents:
+#         return FileResponse(requested)
+#     return FileResponse(index_file)
