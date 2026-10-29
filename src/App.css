@@ -180,6 +180,8 @@
 .metric-block > span { display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .08em; }
 .metric-block > strong { display: block; margin: 9px 0 5px; color: var(--ink-strong); font-family: 'IBM Plex Mono', monospace; font-size: clamp(20px, 2vw, 29px); font-weight: 500; letter-spacing: -.04em; }
 .metric-block small { color: var(--muted); font-size: 10px; }
+.decision-snapshot { margin: 0 0 14px; }
+.decision-snapshot .metric-block > strong { font-size: clamp(16px, 1.5vw, 21px); white-space: nowrap; }
 .definition { min-height: 32px; border: 0; background: transparent; color: var(--forecast); font-family: 'Rubik', sans-serif; font-size: 9px; letter-spacing: 0; text-decoration: underline; }
 .range-note { margin-top: 24px; padding: 18px 0; border-top: 1px solid var(--line-strong); border-bottom: 1px solid var(--line); }
 .range-note strong { display: block; margin: 7px 0; font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 500; }

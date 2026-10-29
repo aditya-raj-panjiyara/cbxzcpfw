@@ -47,6 +47,24 @@ function toChartPoints(periods: Period[]): ChartPoint[] {
   return points
 }
 
+const mean = (values: number[]) => values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null
+
+// Summarises the forecast the buyer actually held at the cutoff: which WINDFOR run(s) it came from
+// and how far that run sat before the cutoff.
+function decisionSnapshot(data: DecisionDay) {
+  const runs = [...new Set(data.periods.flatMap((period) => period.publishTime ? [period.publishTime] : []))].sort()
+  const latestRun = runs[runs.length - 1] ?? null
+  const minutesBefore = latestRun ? Math.round((Date.parse(data.cutoff) - Date.parse(latestRun)) / 60_000) : null
+  const matched = data.periods.filter((period) => period.error != null)
+  return {
+    runs, latestRun,
+    gap: minutesBefore == null ? null : `${Math.floor(minutesBefore / 60)}h ${String(minutesBefore % 60).padStart(2, '0')}m before cutoff`,
+    forecastMean: mean(matched.map((period) => period.forecast as number)),
+    actualMean: mean(matched.map((period) => period.actual as number)),
+    bias: mean(matched.map((period) => period.error as number)),
+  }
+}
+
 const hourTick = (value: number) => formatTime(new Date(value).toISOString())
 const mwValue = (value: number) => formatNumber(value)
 
@@ -88,6 +106,7 @@ export default function DecisionDayPage() {
 
   const selectedPeriod = useMemo(() => data?.periods.find((period) => period.startTime === selectedStart) ?? null, [data, selectedStart])
   const chartPoints = useMemo(() => toChartPoints(data?.periods ?? []), [data])
+  const snapshot = useMemo(() => data ? decisionSnapshot(data) : null, [data])
   const periods = data?.periods ?? []
   const pageCount = Math.ceil(periods.length / PAGE_SIZE)
   const currentPage = Math.min(page, Math.max(pageCount - 1, 0))
@@ -146,6 +165,11 @@ export default function DecisionDayPage() {
             {notice && <div className="notice" role="status">{notice}<button onClick={() => setNotice(null)} aria-label="Dismiss notification">Dismiss</button></div>}
             {data.source.warning && <div className="warning-banner" role="warning">Source refresh failed. Showing cached or partial data. <button onClick={() => setStatusOpen(true)}>Inspect source</button></div>}
             {data.coverage.forecastHours === 0 && <div className="warning-banner" role="status">No decision-relevant WINDFOR forecasts were returned for this date. Actual generation remains visible where available.</div>}
+            {snapshot && <div className="metric-grid decision-snapshot" aria-label="Forecast held at the purchasing cutoff">
+              <div className="metric-block"><span>PURCHASING CUTOFF</span><strong>{formatDateTime(data.cutoff)}</strong><small>Buy decision deadline · {formatDate(data.decisionDate)}</small></div>
+              <div className="metric-block"><span>FORECAST IN HAND</span><strong>{snapshot.latestRun ? formatDateTime(snapshot.latestRun) : 'None'}</strong><small>{snapshot.latestRun ? `WINDFOR run published ${snapshot.gap}${snapshot.runs.length > 1 ? ` · ${snapshot.runs.length} runs mixed across hours` : ''}` : 'No run was published before the cutoff'}</small></div>
+              <div className="metric-block"><span>FORECAST VS ACTUAL</span><strong>{formatSigned(snapshot.bias)}</strong><small>{snapshot.bias == null ? 'No matched periods' : `Day mean ${formatMW(snapshot.forecastMean)} forecast vs ${formatMW(snapshot.actualMean)} actual`}</small></div>
+            </div>}
             <div className="coverage-line">
               <span><strong>{data.coverage.forecastHours}/{data.coverage.expectedForecastHours}</strong> forecast hours</span>
               <span><strong>{data.coverage.actualPeriods}/{data.coverage.expectedActualPeriods}</strong> actual periods</span>
