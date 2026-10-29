@@ -15,7 +15,7 @@ from .service import SourceUnavailable, WindService
 app = FastAPI(title="Wind Forecast Decisions API", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"],
+    allow_origins=["http://localhost:3000", "http://localhost:5173","databrick.hey-adi.me"],
     allow_credentials=False,
     allow_methods=["GET"],
     allow_headers=["*"],
